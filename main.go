@@ -7,6 +7,7 @@ import (
 	_ "github.com/denisenkom/go-mssqldb"
 	"os"
 	"net/http"
+	//"errors"
 )
 func main() {
 	http.HandleFunc("/", handler)
@@ -15,7 +16,15 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, getStatus())
+
+	// Check SQL Role and set 200 if principal
+	status := getStatus()
+	if status != "principal" {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	// Return status
+	fmt.Fprintf(w, status)
 }
 
 func getStatus() (status string) {
