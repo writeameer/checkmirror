@@ -50,6 +50,7 @@ func (cfg *Config) getMirroringStatus() (mirroring *JsonMirroring, err error) {
 	if err != nil {
 		return mirroring, err
 	} else {
+		defer db.Close()
 		// Query DB for db names roles
 		query := "SELECT m.name, d.database_id, d.mirroring_role_desc FROM sys.database_mirroring d, sys.databases m WHERE mirroring_role is not null and m.database_id = d.database_id"
 		rows, err := db.Query(query)
