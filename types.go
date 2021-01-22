@@ -7,8 +7,10 @@ type Config struct {
 }
 
 type JsonResponse struct {
-	Error string      `json:"error,omitempty"`
-	Data  interface{} `json:"data,omitempty"`
+	Error   string      `json:"error,omitempty"`
+	Data    interface{} `json:"data,omitempty"`
+	Time    string      `json:"time"`
+	Version string      `json:"version"`
 }
 
 type JsonDbMirroring struct {

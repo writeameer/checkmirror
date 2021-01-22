@@ -11,20 +11,22 @@ blue=`tput setaf 6`
 reset=`tput sgr0`
 
 FILENAME="checkmirror"
+# -s -w reduce the size of the binary
+LDFLAGS="-X main.VERSION=$(git describe --always --long) -s -w"
 
 build_linux() {
   echo -e "*** Building Linux binary in: ${green}$FILENAME${reset}"
-  GOOS=linux GOARCH=amd64 go build -tags "netgo" -o $FILENAME *.go
+  GOOS=linux GOARCH=amd64 go build -tags "netgo" -ldflags "$LDFLAGS" -o $FILENAME *.go
 }
 
 build_mac() {
   echo -e "*** Building darwin binary in: ${green}$FILENAME${reset}"
-  GOOS=darwin GOARCH=amd64 go build -tags "netgo" -o $FILENAME *.go
+  GOOS=darwin GOARCH=amd64 go build -tags "netgo" -ldflags "$LDFLAGS" -o $FILENAME *.go
 }
 
 build_windows() {
   echo -e "*** Building Windows binary in: ${green}$FILENAME.exe${reset}"
-  GOOS=windows GOARCH=amd64 go build -tags "netgo" -o "$FILENAME.exe" *.go
+  GOOS=windows GOARCH=amd64 go build -tags "netgo" -ldflags "$LDFLAGS" -o "$FILENAME.exe" *.go
 }
 
 errEcho
