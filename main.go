@@ -9,9 +9,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "github.com/denisenkom/go-mssqldb"
 )
+
+var VERSION string = "0.0.0"
 
 func main() {
 	cfg := getServiceConfig()
@@ -34,7 +37,7 @@ func (cfg *Config) handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Return status
-		fmt.Fprintf(w, PrettyPrintJson(mirroring))
+		fmt.Fprintf(w, JsonPrintIt(&JsonResponse{Data: mirroring}))
 	}
 }
 
@@ -103,9 +106,17 @@ func PrettyPrintJson(v interface{}) string {
 	return fmt.Sprintf("%-512s", string(outBytes)) // Pad right to avoid "Friendly HTTP error messages" issue in IE & Chrome
 }
 
+func JsonPrintIt(resp *JsonResponse) string {
+	resp.Version = VERSION
+	resp.Time = time.Now().UTC().Format(time.RFC3339)
+	return PrettyPrintJson(resp)
+}
+
 func JsonErrorIt(msg string) string {
 	jsonErr := JsonResponse{
-		Error: msg,
+		Error:   msg,
+		Version: VERSION,
+		Time:    time.Now().UTC().Format(time.RFC3339),
 	}
 	outBytes, err := json.MarshalIndent(jsonErr, "", "  ")
 	if err != nil {
