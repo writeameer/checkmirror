@@ -84,57 +84,59 @@ func (s *Server) getMirroringStatus() (mirroring *JsonMirroring, err error) {
 	conn := fmt.Sprintf("sqlserver://%s:%d/?database=master&connection+timeout=30", s.config.SQLServerHost, s.config.SQLServerPort)
 	log.Printf("The connection string is: %s", conn)
 	db, err := sql.Open("sqlserver", conn)
-	defer db.Close()
 
 	if db.Ping() != nil {
 		return mirroring, fmt.Errorf("Could not connect to database on %s:%d", s.config.SQLServerHost, s.config.SQLServerPort)
 	}
 
+	defer db.Close()
 	// Query DB for db names roles
 	query := "SELECT m.name, d.database_id, d.mirroring_role_desc FROM sys.database_mirroring d, sys.databases m WHERE mirroring_role is not null and m.database_id = d.database_id"
 	rows, err := db.Query(query)
-	defer rows.Close()
 
 	if err != nil {
 		return mirroring, err
 	}
 
-	// Iterate through result set to construct json response
-	mirrorRolesMap := make(map[string]struct{}, 0)
-	for rows.Next() {
+	if rows != nil {
+		defer rows.Close()
 
-		// Read data from row
-		var dbName string
-		var dbID int
-		var dbRole string
-		err = rows.Scan(&dbName, &dbID, &dbRole)
-		if err != nil {
-			return mirroring, err
+		// Iterate through result set to construct json response
+		mirrorRolesMap := make(map[string]struct{}, 0)
+		for rows.Next() {
+			// Read data from row
+			var dbName string
+			var dbID int
+			var dbRole string
+			err = rows.Scan(&dbName, &dbID, &dbRole)
+			if err != nil {
+				return mirroring, err
+			}
+
+			dbRole = strings.ToLower(dbRole)
+			dbMirroring := &JsonDbMirroring{
+				Name:          dbName,
+				MirroringRole: dbRole,
+			}
+
+			// Get Overall Mirroring Role
+			if mirroring.OverallMirroringRole == "none" {
+				// store the role of the first db in the overall
+				mirroring.OverallMirroringRole = dbRole
+			} else if mirroring.OverallMirroringRole == "principal" && dbRole != "principal" {
+				mirroring.OverallMirroringRole = dbRole
+			}
+
+			// Append database and role to list
+			mirroring.DatabasesMirroring = append(mirroring.DatabasesMirroring, dbMirroring)
+			mirrorRolesMap[dbRole] = struct{}{}
+
 		}
 
-		dbRole = strings.ToLower(dbRole)
-		dbMirroring := &JsonDbMirroring{
-			Name:          dbName,
-			MirroringRole: dbRole,
+		// multiple db mirroring roles result in a "mixed" overall mirroring role
+		if len(mirrorRolesMap) > 1 {
+			mirroring.OverallMirroringRole = "mixed"
 		}
-
-		// Get Overall Mirroring Role
-		if mirroring.OverallMirroringRole == "none" {
-			// store the role of the first db in the overall
-			mirroring.OverallMirroringRole = dbRole
-		} else if mirroring.OverallMirroringRole == "principal" && dbRole != "principal" {
-			mirroring.OverallMirroringRole = dbRole
-		}
-
-		// Append database and role to list
-		mirroring.DatabasesMirroring = append(mirroring.DatabasesMirroring, dbMirroring)
-		mirrorRolesMap[dbRole] = struct{}{}
-
-	}
-
-	// multiple db mirroring roles result in a "mixed" overall mirroring role
-	if len(mirrorRolesMap) > 1 {
-		mirroring.OverallMirroringRole = "mixed"
 	}
 
 	log.Println("I am: " + mirroring.OverallMirroringRole)
