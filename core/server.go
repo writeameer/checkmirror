@@ -103,11 +103,10 @@ func (s *Server) getMirroringStatus() (mirroring *JsonMirroring, err error) {
 	mirrorRolesMap := make(map[string]struct{}, 0)
 	for rows.Next() {
 
+		// Read data from row
 		var dbName string
 		var dbID int
 		var dbRole string
-
-		// Read data from row
 		err = rows.Scan(&dbName, &dbID, &dbRole)
 		if err != nil {
 			return mirroring, err
