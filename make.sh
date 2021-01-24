@@ -29,6 +29,7 @@ build_windows() {
   GOOS=windows GOARCH=amd64 go build -tags "netgo" -ldflags "$LDFLAGS" -o "$FILENAME.exe" *.go
 }
 
+
 errEcho
 errEcho "*** ${green}$0${reset} executed with params: ${blue}$1 $2${reset}"
 

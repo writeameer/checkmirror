@@ -20,7 +20,7 @@ func main() {
 		RunFunc: func(smgr service.Manager) error {
 			// Create & start server
 			checkmirror := core.NewServer()
-			checkmirror.Start()
+			go checkmirror.Start()
 
 			// Once initialization requiring root is done, call this.
 			err := smgr.DropPrivileges()
