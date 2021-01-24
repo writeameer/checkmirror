@@ -10,7 +10,7 @@ pink=`tput setaf 5`
 blue=`tput setaf 6`
 reset=`tput sgr0`
 
-FILENAME="checkmirror"
+FILENAME="CheckMirror"
 # -s -w reduce the size of the binary
 LDFLAGS="-X writeameer/checkmirror/core.VERSION=$(git describe --always --long) -s -w"
 

@@ -9,7 +9,7 @@ import (
 	"gopkg.in/hlandau/service.v2"
 )
 
-const serviceName = "checkmirror"
+const serviceName = "CheckMirror"
 
 func main() {
 	// deals with the --service.do=* options
@@ -36,7 +36,7 @@ func main() {
 			smgr.SetStarted()
 
 			// Optionally set a status.
-			smgr.SetStatus("Checkmirror: running ok")
+			smgr.SetStatus(fmt.Sprintf("%s: running ok", serviceName))
 
 			// Wait until stop is requested.
 			<-smgr.StopChan()
