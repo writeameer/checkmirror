@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -34,6 +35,7 @@ func GetServiceConfig() (cfg *Config) {
 		intPort, err := strconv.Atoi(sqlPort)
 		if err != nil {
 			log.Fatalf("Provided value for SQLSERVER_PORT, %s, cannot be converted to an integer", sqlPort)
+			elog.Error(104, fmt.Sprintf("Provided value for SQLSERVER_PORT, %s, cannot be converted to an integer", sqlPort))
 		}
 		cfg.SQLServerPort = uint16(intPort)
 	}
@@ -42,6 +44,7 @@ func GetServiceConfig() (cfg *Config) {
 		intPort, err := strconv.Atoi(listenPort)
 		if err != nil {
 			log.Fatalf("Provided value for LISTEN_PORT, %s, cannot be converted to an integer", listenPort)
+			elog.Error(105, fmt.Sprintf("Provided value for LISTEN_PORT, %s, cannot be converted to an integer", listenPort))
 		}
 		cfg.ListenPort = uint16(intPort)
 	}

@@ -6,10 +6,13 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"golang.org/x/sys/windows/svc/eventlog"
 )
 
 // VERSION is the version of the server
 var VERSION string = "0.0.0"
+var elog *eventlog.Log
 
 type Runnable interface {
 	Start() error
@@ -23,7 +26,14 @@ type Server struct {
 
 // NewServer creates and returns a new server
 func NewServer() *Server {
-
+	var err error
+	elog, err = eventlog.Open("CheckMirror")
+	if err != nil {
+		log.Fatalf("Error initializing elog: %s", err.Error())
+	}
+	if elog == nil {
+		log.Fatalf("Error initializing elog, can't be nil!")
+	}
 	myConfig := GetServiceConfig()
 
 	server := &Server{
@@ -35,45 +45,46 @@ func NewServer() *Server {
 
 // Start stars the server
 func (s *Server) Start() {
-
 	addr := fmt.Sprintf("0.0.0.0:%d", s.config.ListenPort)
-	log.Printf("Server started on %s", addr)
+	elog.Info(1, fmt.Sprintf("Server (%s) started on %s", VERSION, addr))
+	log.Printf("Server (%s) started on %s", VERSION, addr)
 	server := &http.Server{
 		Addr:    addr,
 		Handler: http.HandlerFunc(s.defaultHandler),
 	}
 
-	log.Fatal(server.ListenAndServe())
+	err := server.ListenAndServe()
+	if err != nil {
+		elog.Error(100, fmt.Sprintf("ListenAndServe returned error: %s", err.Error()))
+		log.Fatalf("ListenAndServe returned error: %s", err)
+	}
 }
 
 // Stop Stops the server
 func (*Server) Stop() error {
+	elog.Close()
 	// Stop the service here
 	return nil
 }
 
 // defaultHandler The default handler for the service. Returns the mirror status
 func (s *Server) defaultHandler(w http.ResponseWriter, r *http.Request) {
-
 	//Check SQL Role and set 200 if principal
 	mirroring, err := s.getMirroringStatus()
 	if err != nil {
-		log.Println(err)
+		log.Println(fmt.Sprintf("Unable to get mirroring status, error: %s", err.Error()))
+		elog.Error(101, fmt.Sprintf("Unable to get mirroring status, error: %s", err.Error()))
 		http.Error(w, JsonErrorIt(err.Error()), http.StatusInternalServerError)
 	} else {
 		if mirroring.OverallMirroringRole != "principal" {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
-
 		// Return status
 		fmt.Fprintf(w, JsonPrintIt(&JsonResponse{Data: mirroring}))
 	}
-
 }
 
 func (s *Server) getMirroringStatus() (mirroring *JsonMirroring, err error) {
-
-	log.Println("Getting Mirroring Status:")
 	// Initialise response
 	mirroring = &JsonMirroring{
 		OverallMirroringRole: "none",
@@ -82,7 +93,7 @@ func (s *Server) getMirroringStatus() (mirroring *JsonMirroring, err error) {
 
 	// Connect to the database
 	conn := fmt.Sprintf("sqlserver://%s:%d/?database=master&connection+timeout=30", s.config.SQLServerHost, s.config.SQLServerPort)
-	log.Printf("The connection string is: %s", conn)
+	// log.Printf("The connection string is: %s", conn)
 	db, err := sql.Open("sqlserver", conn)
 
 	if db.Ping() != nil {
@@ -139,6 +150,7 @@ func (s *Server) getMirroringStatus() (mirroring *JsonMirroring, err error) {
 		}
 	}
 
-	log.Println("I am: " + mirroring.OverallMirroringRole)
+	elog.Info(2, fmt.Sprintf("Got '%s' mirroring status from %s:%d\n", mirroring.OverallMirroringRole, s.config.SQLServerHost, s.config.SQLServerPort))
+	log.Printf("Got '%s' mirroring status from %s:%d\n", mirroring.OverallMirroringRole, s.config.SQLServerHost, s.config.SQLServerPort)
 	return mirroring, nil
 }

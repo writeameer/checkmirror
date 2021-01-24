@@ -11,6 +11,7 @@ func PrettyPrintJson(v interface{}) string {
 	outBytes, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
 		log.Printf("ERROR: PrettyPrintJson error '%s' for v='%+v'", err.Error(), v)
+		elog.Error(102, fmt.Sprintf("ERROR: PrettyPrintJson error '%s' for v='%+v'", err.Error(), v))
 	}
 	outBytes = append(outBytes, "\n"...)
 	return fmt.Sprintf("%-512s", string(outBytes)) // Pad right to avoid "Friendly HTTP error messages" issue in IE & Chrome
@@ -31,6 +32,7 @@ func JsonErrorIt(msg string) string {
 	outBytes, err := json.MarshalIndent(jsonErr, "", "  ")
 	if err != nil {
 		log.Printf("ERROR: JsonErrorIt marshal error '%s'", err.Error())
+		elog.Error(103, fmt.Sprintf("ERROR: JsonErrorIt marshal error '%s'", err.Error()))
 	}
 	return fmt.Sprintf("%-512s", outBytes) // Pad right to avoid "Friendly HTTP error messages" issue in IE & Chrome
 }

@@ -10,6 +10,8 @@ require (
 	github.com/denisenkom/go-mssqldb v0.9.0
 	github.com/erikdubbelboer/gspt v0.0.0-20201015204752-6cb2489021da // indirect
 	github.com/ogier/pflag v0.0.1 // indirect
+	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
+	golang.org/x/sys v0.0.0-20210123231150-1d476976d117
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6 // indirect
 	gopkg.in/hlandau/configurable.v1 v1.0.1 // indirect
 	gopkg.in/hlandau/easyconfig.v1 v1.0.17
