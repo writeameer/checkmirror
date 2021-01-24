@@ -38,11 +38,6 @@ func NewServer() *Server {
 // Start stars the server
 func (s *Server) Start() {
 
-	// log.Println("The address is: " + addr)
-	// log.Println("The SQLServerHost config is:" + s.config.SQLServerHost)
-	// log.Printf("The SQLServerPort is: %d,", s.config.SQLServerPort)
-	// log.Printf("The ListenPort config is: %d", s.config.ListenPort)
-
 	addr := fmt.Sprintf("0.0.0.0:%d", s.config.ListenPort)
 	server := &http.Server{
 		Addr:    addr,
