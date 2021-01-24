@@ -1,10 +1,10 @@
-package main
+package core
 
-type Config struct {
-	SqlServerHost string
-	SqlServerPort uint16
-	ListenPort    uint16
-}
+// type Config struct {
+// 	SqlServerHost string
+// 	SqlServerPort uint16
+// 	ListenPort    uint16
+// }
 
 type JsonResponse struct {
 	Error   string      `json:"error,omitempty"`
