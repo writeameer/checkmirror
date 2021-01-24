@@ -37,7 +37,7 @@ func NewServer() *Server {
 func (s *Server) Start() {
 
 	addr := fmt.Sprintf("0.0.0.0:%d", s.config.ListenPort)
-	log.Printf("Server started on %s", addr)
+	log.Printf("Server (%s) started on %s", VERSION, addr)
 	server := &http.Server{
 		Addr:    addr,
 		Handler: http.HandlerFunc(s.defaultHandler),
@@ -72,8 +72,6 @@ func (s *Server) defaultHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) getMirroringStatus() (mirroring *JsonMirroring, err error) {
-
-	log.Println("Getting Mirroring Status:")
 	// Initialise response
 	mirroring = &JsonMirroring{
 		OverallMirroringRole: "none",
@@ -82,7 +80,7 @@ func (s *Server) getMirroringStatus() (mirroring *JsonMirroring, err error) {
 
 	// Connect to the database
 	conn := fmt.Sprintf("sqlserver://%s:%d/?database=master&connection+timeout=30", s.config.SQLServerHost, s.config.SQLServerPort)
-	log.Printf("The connection string is: %s", conn)
+	// log.Printf("The connection string is: %s", conn)
 	db, err := sql.Open("sqlserver", conn)
 
 	if db.Ping() != nil {
@@ -139,6 +137,6 @@ func (s *Server) getMirroringStatus() (mirroring *JsonMirroring, err error) {
 		}
 	}
 
-	log.Println("I am: " + mirroring.OverallMirroringRole)
+	log.Printf("Got '%s' mirroring status from %s:%d\n", mirroring.OverallMirroringRole, s.config.SQLServerHost, s.config.SQLServerPort)
 	return mirroring, nil
 }

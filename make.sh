@@ -12,7 +12,7 @@ reset=`tput sgr0`
 
 FILENAME="checkmirror"
 # -s -w reduce the size of the binary
-LDFLAGS="-X main.VERSION=$(git describe --always --long) -s -w"
+LDFLAGS="-X writeameer/checkmirror/core.VERSION=$(git describe --always --long) -s -w"
 
 build_linux() {
   echo -e "*** Building Linux binary in: ${green}$FILENAME${reset}"

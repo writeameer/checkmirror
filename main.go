@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"writeameer/checkmirror/core"
 
 	_ "github.com/denisenkom/go-mssqldb"
@@ -8,14 +9,16 @@ import (
 	"gopkg.in/hlandau/service.v2"
 )
 
-func main() {
+const serviceName = "checkmirror"
 
+func main() {
+	// deals with the --service.do=* options
 	easyconfig.ParseFatal(nil, nil)
 
 	service.Main(&service.Info{
-		Title:       "Checkmirror Server",
-		Name:        "Checkmirror",
-		Description: "Checkmirror queries the local MS SQL Server to return an HTTP 200 status code if it is a principal",
+		Title:       "Check SQL Mirroring Service",
+		Name:        serviceName,
+		Description: fmt.Sprintf("%s queries the local MS SQL Server to return an HTTP 200 status code if it is a principal", serviceName),
 
 		RunFunc: func(smgr service.Manager) error {
 			// Create & start server
