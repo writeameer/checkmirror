@@ -11,11 +11,9 @@ import (
 // VERSION is the version of the server
 var VERSION string = "0.0.0"
 
-// Service interface defines methods that need to be implemented for running this app as a windows service
-type Service interface {
-	start() bool
-	stop() bool
-	status() string
+type Runnable interface {
+	Start() error
+	Stop() error
 }
 
 // Server wrapps the check mirror server in a server object that implements
@@ -39,12 +37,19 @@ func NewServer() *Server {
 func (s *Server) Start() {
 
 	addr := fmt.Sprintf("0.0.0.0:%d", s.config.ListenPort)
+	log.Printf("Server started on %s", addr)
 	server := &http.Server{
 		Addr:    addr,
 		Handler: http.HandlerFunc(s.defaultHandler),
 	}
 
 	log.Fatal(server.ListenAndServe())
+}
+
+// Stop Stops the server
+func (*Server) Stop() error {
+	// Stop the service here
+	return nil
 }
 
 // defaultHandler The default handler for the service. Returns the mirror status
